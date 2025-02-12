@@ -1,9 +1,14 @@
 package es.etg.psp.model;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.KeyStore.Builder;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Evento implements Asientable {
 
@@ -139,31 +144,59 @@ public class Evento implements Asientable {
     }
 
     public void generarTicket() throws IOException {
+
         File file = new File("Ticket.txt");
 
         if (!file.exists()) {
             file.createNewFile();
         }
+        int contar = contar(file) + 1;
+        String begin ="*********************************************************************Ticket " + contar+ "***************************************************************************";
+        String end ="***********************************************************************************************************************************************************";
 
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            for (Asiento[] asien : asientos) {
-                for (Asiento asiento : asien) {
-                    if (asiento != null && asiento.getNombre()!=null) {
-                        bw.write(asiento.getNombre() + System.lineSeparator());
-                        bw.write(asiento.getEdad() + System.lineSeparator());
-                        bw.write(asiento.getPuntos() + System.lineSeparator());
-                        bw.write(System.lineSeparator());
-                        
+
+        Set<String> as = new HashSet<>();
+
+        try (BufferedWriter br = new BufferedWriter(new FileWriter(file, true))) {
+
+            for (Asiento[] string : asientos) {
+               
+                for (Asiento asiento : string) {
+                    if (asiento != null && asiento.getNombre() != null) {
+                        String ticket =begin + "\n"+   asiento.getNombre() + "\n" + asiento.getEdad() + "\n" + asiento.getPuntos() + "\n" + end
+                                + "\n\n";
+
+                        if (!as.contains(ticket)) {
+                            as.add(ticket);
+                            br.write(ticket);
+                        }
                     }
 
+                    
                 }
-            }
-
-            for (int i = 0; i < asientos.length; i++) {
-                
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+
     }
+
+    public int contar(File file) {
+        int contar = 0;
+        String line = "";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("*********************************************************************Ticket ")) {
+                    contar++;
+                }
+            }
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+                return contar;
+
+    }
+
 }
